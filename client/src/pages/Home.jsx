@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { User, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
   return (

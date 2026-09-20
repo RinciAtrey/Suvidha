@@ -38,6 +38,17 @@ body {
   box-shadow: 0 4px 20px rgba(6, 95, 70, 0.06);
 }
 
+.life-event-card {
+  flex-shrink: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.life-event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(6, 95, 70, 0.12);
+  border-color: var(--primary-light);
+}
+
 /* Typography */
 h1, h2, h3 {
   font-weight: 700;
@@ -184,6 +195,8 @@ textarea.input-field {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
 }
 
 .navbar-logo {
@@ -200,6 +213,8 @@ textarea.input-field {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
 }
 
 .nav-link {
@@ -231,6 +246,8 @@ textarea.input-field {
   padding-left: 0.75rem;
   margin-left: 0.5rem;
   border-left: 1px solid var(--card-border);
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
 }
 
 .navbar-toggle {
@@ -327,12 +344,11 @@ textarea.input-field {
 /* Document Status */
 .status-badge {
   display: inline-block;
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.6rem;
   border-radius: 4px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-top: 0.5rem;
-  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .status-added { background: var(--soft-bg); color: var(--primary-dark); border: 1px solid var(--card-border); }

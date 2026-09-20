@@ -64,7 +64,7 @@ function EligibilityForm({ onResults }) {
       const res = await api.post('/schemes/eligible', payload);
       onResults(res.data);
       setChecked(true);
-    } catch (err) {
+    } catch {
       alert('Failed to check eligibility. Please try again.');
     }
     setLoading(false);
@@ -148,11 +148,11 @@ export default function Schemes({ role }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [eligibleResults, setEligibleResults] = useState(null);
 
-  if (!role) return <Navigate to="/" />;
-
   useEffect(() => {
     api.get('/schemes').then(res => setAllSchemes(res.data)).catch(err => console.error('Failed to load schemes', err)).finally(() => setLoading(false));
   }, []);
+
+  if (!role) return <Navigate to="/" />;
 
   const filteredSchemes = allSchemes.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
 

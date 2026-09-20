@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { FileText, LogOut, Info, LayoutDashboard, Menu, X, Users, Inbox, Ticket, Landmark } from 'lucide-react';
+import { FileText, LogOut, Info, LayoutDashboard, Menu, X, Users, Inbox, Ticket, Landmark, History } from 'lucide-react';
 import api from '../lib/api';
 
 export default function Navbar({ role, setRole }) {
@@ -70,6 +70,11 @@ export default function Navbar({ role, setRole }) {
               {role === 'superadmin' && (
                 <NavLink to="/pending-queue" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>
                   <Ticket size={16} /> Pending Queue
+                </NavLink>
+              )}
+              {(role === 'admin' || role === 'superadmin') && (
+                <NavLink to="/history" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={closeMenu}>
+                  <History size={16} /> History
                 </NavLink>
               )}
 

@@ -16,6 +16,7 @@ model User {
   isAvailable       Boolean    @default(true)   // admins/superadmins toggle this to receive auto-assigned tickets
   questionsAsked    Question[] @relation("AskedBy")
   questionsAssigned Question[] @relation("AssignedAdmin")
+  questionsClosed   Question[] @relation("ClosedBy")
   messages          Message[]
   createdAt         DateTime   @default(now())
 }
@@ -39,11 +40,14 @@ model Question {
   content      String
   userId       String
   user         User     @relation("AskedBy", fields: [userId], references: [id])
-  documentId   String
-  document     Document @relation(fields: [documentId], references: [id])
-  status       String   @default("unassigned") // 'unassigned' | 'assigned' | 'answered'
+  documentId   String?  // null for general chatbot escalations not tied to a specific document
+  document     Document? @relation(fields: [documentId], references: [id])
+  status       String   @default("unassigned") // 'unassigned' | 'assigned' | 'answered' | 'closed'
   assignedToId String?
   assignedTo   User?    @relation("AssignedAdmin", fields: [assignedToId], references: [id])
+  closedById   String?
+  closedBy     User?    @relation("ClosedBy", fields: [closedById], references: [id])
+  closedAt     DateTime?
   messages     Message[]
   createdAt    DateTime @default(now())
 }

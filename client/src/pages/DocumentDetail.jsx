@@ -14,26 +14,20 @@ export default function DocumentDetail({ role }) {
   const [newQuestion, setNewQuestion] = useState('');
   const userId = localStorage.getItem('userId');
 
-  if (!role) return <Navigate to="/" />;
-
-  useEffect(() => {
-    fetchDoc();
-  }, [id]);
-
   const fetchDoc = async () => {
     try {
       const res = await api.get(`/documents/${id}`);
       setDoc(res.data);
-    } catch (err) {
+    } catch {
       console.log("Backend not ready, using mock data");
       const mockDocs = [
         { id: '1', title: 'Indian Passport', description: 'Apply for a new or renewed Indian Passport.', steps: '1. Register on Passport Seva Online Portal\n2. Fill the application form\n3. Pay the fee and book appointment\n4. Visit the Passport Seva Kendra (PSK)', updateSteps: "1. Log in to the Passport Seva portal and select 'Reissue of Passport'\n2. Fill the reissue form for changes (address, name, expiry renewal)\n3. Pay the fee and schedule an appointment at the PSK\n4. Submit original passport and supporting documents", requiredDocs: 'Aadhaar Card, Date of Birth proof, Non-ECR proof (if applicable)', officialLink: 'https://www.passportindia.gov.in/', sources: 'Passport Seva Official Portal|https://www.passportindia.gov.in/\nMinistry of External Affairs|https://www.mea.gov.in/', guides: 'Passport Seva Help & FAQs|https://www.passportindia.gov.in/', questions: [ { id: 'q1', content: 'What documents are required for address proof if I am staying on rent?', messages: [] } ] },
         { id: '2', title: 'Aadhar Card', description: 'Enroll for a new Aadhar card or update your existing details.', steps: '1. Locate nearest Aadhar center\n2. Book an appointment online\n3. Provide biometric and demographic data at the center', updateSteps: '1. Visit an Aadhaar Seva Kendra or the UIDAI Self-Service Update Portal (SSUP)\n2. Select the field to update\n3. Upload supporting documents\n4. Pay the nominal update fee where applicable', requiredDocs: 'Proof of Identity, Proof of Address, Date of Birth proof', officialLink: 'https://uidai.gov.in/', sources: 'UIDAI Official Portal|https://uidai.gov.in/\nAadhaar Self-Service Update Portal|https://ssup.uidai.gov.in/', guides: 'UIDAI FAQs & Help Center|https://uidai.gov.in/', questions: [] },
         { id: '3', title: 'PAN Card', description: 'Apply for a Permanent Account Number for financial transactions.', steps: '1. Fill Form 49A on NSDL/UTIITSL\n2. Upload digital documents\n3. Pay the processing fee online', updateSteps: "1. Visit NSDL/UTIITSL and select 'Changes or Correction in PAN Data'\n2. Fill the correction form\n3. Upload proof for the field being changed\n4. Pay the correction fee online", requiredDocs: 'Aadhaar Card, Passport size photos, Address proof', officialLink: 'https://www.onlineservices.nsdl.com/paam/endUserRegisterContact.html', sources: 'NSDL e-Gov PAN Services|https://www.onlineservices.nsdl.com/paam/endUserRegisterContact.html\nUTIITSL PAN Services|https://www.pan.utiitsl.com/', guides: 'Income Tax e-Filing Portal|https://www.incometax.gov.in/', questions: [] }
       ];
-      
+
       const found = mockDocs.find(d => d.id === id);
-      
+
       // Simulate checking local storage for new questions if backend is offline
       const localQuestions = JSON.parse(localStorage.getItem(`questions_${id}`) || '[]');
       if (found) {
@@ -44,6 +38,16 @@ export default function DocumentDetail({ role }) {
     }
     setLoading(false);
   };
+
+  // fetchDoc is intentionally defined at component scope so ask/reply/close handlers can reuse it for refetching;
+  // it's redefined every render but only depends on `id`, so re-running the effect on `id` change alone is correct.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchDoc();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  if (!role) return <Navigate to="/" />;
 
   const handleAskQuestion = async () => {
     if (!newQuestion.trim()) return;
@@ -61,7 +65,7 @@ export default function DocumentDetail({ role }) {
       const q = { id: Date.now().toString(), content: newQuestion, userId, messages: [] };
       const newQuestions = [...currentQuestions, q];
       localStorage.setItem(`questions_${id}`, JSON.stringify(newQuestions));
-      
+
       // Update UI immediately
       setDoc(prev => ({ ...prev, questions: [...(prev.questions || []), q] }));
     }
@@ -108,6 +112,15 @@ export default function DocumentDetail({ role }) {
     }
   };
 
+  const handleCloseChat = async (questionId) => {
+    try {
+      await api.patch(`/questions/${questionId}/close`);
+      fetchDoc();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to close conversation');
+    }
+  };
+
   if (loading) return <div style={{ textAlign: 'center', padding: '3rem' }}>Loading document...</div>;
   if (!doc) return <div style={{ textAlign: 'center', padding: '3rem' }}>Document not found</div>;
 
@@ -131,7 +144,7 @@ export default function DocumentDetail({ role }) {
         <p className="text-muted" style={{ fontSize: '1.125rem', marginBottom: '2rem', lineHeight: '1.6' }}>
           {doc.description}
         </p>
-        
+
         {doc.requiredDocs && (
           <div style={{ marginBottom: '2.5rem' }}>
             <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -234,7 +247,7 @@ export default function DocumentDetail({ role }) {
                   {q.status && <StatusBadge question={q} />}
                 </div>
 
-                <MessageThread question={q} currentUserId={userId} currentRole={role} onSend={handleSendMessage} />
+                <MessageThread question={q} currentUserId={userId} currentRole={role} onSend={handleSendMessage} onClose={handleCloseChat} />
               </div>
             ))
           )}
@@ -248,9 +261,9 @@ export default function DocumentDetail({ role }) {
               Have a question?
             </h4>
             <div style={{ display: 'flex', gap: '1rem' }}>
-              <input 
-                className="input-field" 
-                placeholder="E.g. What if I don't have an address proof?" 
+              <input
+                className="input-field"
+                placeholder="E.g. What if I don't have an address proof?"
                 value={newQuestion}
                 onChange={e => setNewQuestion(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAskQuestion()}

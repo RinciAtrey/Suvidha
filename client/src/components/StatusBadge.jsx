@@ -1,4 +1,11 @@
 export default function StatusBadge({ question }) {
+  if (question.status === 'closed') {
+    return (
+      <span className="status-badge" style={{ background: '#e5e7eb', color: '#374151', border: '1px solid #d1d5db' }}>
+        Closed
+      </span>
+    );
+  }
   if (question.status === 'answered') {
     return <span className="status-badge status-added">Answered</span>;
   }

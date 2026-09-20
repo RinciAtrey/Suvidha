@@ -11,6 +11,8 @@ import Signup from './pages/Signup';
 import Community from './pages/Community';
 import MyTickets from './pages/MyTickets';
 import PendingQueue from './pages/PendingQueue';
+import History from './pages/History';
+import ChatWidget from './components/ChatWidget';
 import './index.css';
 
 function App() {
@@ -31,8 +33,10 @@ function App() {
           <Route path="/community" element={<Community role={role} />} />
           <Route path="/my-tickets" element={<MyTickets role={role} />} />
           <Route path="/pending-queue" element={<PendingQueue role={role} />} />
+          <Route path="/history" element={<History role={role} />} />
         </Routes>
       </div>
+      {role === 'user' && <ChatWidget />}
     </Router>
   );
 }

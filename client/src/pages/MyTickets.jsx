@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import api from '../lib/api';
-import { Inbox, FileText, CheckCircle2 } from 'lucide-react';
+import { Inbox, CheckCircle2 } from 'lucide-react';
 import MessageThread from '../components/MessageThread';
+import DocumentBadge from '../components/DocumentBadge';
 
 export default function MyTickets({ role }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const userId = localStorage.getItem('userId');
-
-  if (!role) return <Navigate to="/" />;
-  if (role !== 'admin' && role !== 'superadmin') return <Navigate to="/dashboard" />;
 
   const fetchTickets = async () => {
     try {
@@ -22,7 +20,12 @@ export default function MyTickets({ role }) {
     setLoading(false);
   };
 
+  // fetchTickets is intentionally defined at component scope so send/close handlers can reuse it for refetching.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchTickets(); }, []);
+
+  if (!role) return <Navigate to="/" />;
+  if (role !== 'admin' && role !== 'superadmin') return <Navigate to="/dashboard" />;
 
   const handleSendMessage = async (questionId, content) => {
     try {
@@ -30,6 +33,15 @@ export default function MyTickets({ role }) {
       fetchTickets();
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to send message');
+    }
+  };
+
+  const handleClose = async (questionId) => {
+    try {
+      await api.patch(`/questions/${questionId}/close`);
+      fetchTickets();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to close conversation');
     }
   };
 
@@ -54,13 +66,11 @@ export default function MyTickets({ role }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {tickets.map(q => (
             <div key={q.id} className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid #f59e0b' }}>
-              <Link to={`/document/${q.documentId}`} className="badge" style={{ marginBottom: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none' }}>
-                <FileText size={12} /> {q.document?.title}
-              </Link>
+              <div style={{ marginBottom: '0.75rem' }}><DocumentBadge question={q} /></div>
               <p style={{ fontWeight: 500, margin: '0 0 0.25rem', lineHeight: '1.5' }}>{q.content}</p>
               <p className="text-muted" style={{ fontSize: '0.8rem', margin: '0 0 1rem' }}>Asked by {q.user?.name || 'a citizen'}</p>
 
-              <MessageThread question={q} currentUserId={userId} currentRole={role} onSend={handleSendMessage} />
+              <MessageThread question={q} currentUserId={userId} currentRole={role} onSend={handleSendMessage} onClose={handleClose} />
             </div>
           ))}
         </div>

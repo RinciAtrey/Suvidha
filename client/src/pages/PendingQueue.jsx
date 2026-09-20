@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import api from '../lib/api';
-import { Ticket, FileText, AlertTriangle, Clock } from 'lucide-react';
+import { Ticket, AlertTriangle, Clock } from 'lucide-react';
 import MessageThread from '../components/MessageThread';
+import DocumentBadge from '../components/DocumentBadge';
 
 export default function PendingQueue({ role }) {
   const [unassigned, setUnassigned] = useState([]);
@@ -10,9 +11,6 @@ export default function PendingQueue({ role }) {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const userId = localStorage.getItem('userId');
-
-  if (!role) return <Navigate to="/" />;
-  if (role !== 'superadmin') return <Navigate to="/dashboard" />;
 
   const fetchAll = async () => {
     try {
@@ -29,7 +27,12 @@ export default function PendingQueue({ role }) {
     setLoading(false);
   };
 
+  // fetchAll is intentionally defined at component scope so assign/send/close handlers can reuse it for refetching.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchAll(); }, []);
+
+  if (!role) return <Navigate to="/" />;
+  if (role !== 'superadmin') return <Navigate to="/dashboard" />;
 
   const handleAssign = async (questionId, adminId) => {
     try {
@@ -49,11 +52,18 @@ export default function PendingQueue({ role }) {
     }
   };
 
+  const handleClose = async (questionId) => {
+    try {
+      await api.patch(`/questions/${questionId}/close`);
+      fetchAll();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to close conversation');
+    }
+  };
+
   const TicketCard = ({ q, accent }) => (
     <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: `4px solid ${accent}` }}>
-      <Link to={`/document/${q.documentId}`} className="badge" style={{ marginBottom: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none' }}>
-        <FileText size={12} /> {q.document?.title}
-      </Link>
+      <div style={{ marginBottom: '0.75rem' }}><DocumentBadge question={q} /></div>
       <p style={{ fontWeight: 500, margin: '0 0 0.25rem', lineHeight: '1.5' }}>{q.content}</p>
       <p className="text-muted" style={{ fontSize: '0.8rem', margin: '0 0 1rem' }}>
         Asked by {q.user?.name || 'a citizen'} · {q.assignedTo ? `Assigned to ${q.assignedTo.name}` : 'Not assigned to anyone'}
@@ -61,7 +71,7 @@ export default function PendingQueue({ role }) {
 
       <select
         className="input-field"
-        style={{ width: 'auto', padding: '0.5rem 0.75rem', marginBottom: '1rem' }}
+        style={{ width: 'auto', minWidth: '220px', padding: '0.5rem 0.75rem', marginBottom: '1rem', display: 'block' }}
         value={q.assignedToId || ''}
         onChange={e => handleAssign(q.id, e.target.value)}
       >
@@ -73,7 +83,7 @@ export default function PendingQueue({ role }) {
         ))}
       </select>
 
-      <MessageThread question={q} currentUserId={userId} currentRole={role} onSend={handleSendMessage} />
+      <MessageThread question={q} currentUserId={userId} currentRole={role} onSend={handleSendMessage} onClose={handleClose} />
     </div>
   );
 
