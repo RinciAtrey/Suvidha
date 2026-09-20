@@ -242,7 +242,7 @@ export default function DocumentDetail({ role }) {
                 <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', gap: '0.75rem' }}>
                     <MessageSquare size={20} color="#059669" style={{ marginTop: '0.15rem', flexShrink: 0 }} />
-                    <p style={{ fontWeight: 500, margin: 0, lineHeight: '1.5' }}>{q.content}</p>
+                    <p style={{ fontWeight: 500, margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{q.content}</p>
                   </div>
                   {q.status && <StatusBadge question={q} />}
                 </div>

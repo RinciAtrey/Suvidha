@@ -64,7 +64,7 @@ export default function PendingQueue({ role }) {
   const TicketCard = ({ q, accent }) => (
     <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: `4px solid ${accent}` }}>
       <div style={{ marginBottom: '0.75rem' }}><DocumentBadge question={q} /></div>
-      <p style={{ fontWeight: 500, margin: '0 0 0.25rem', lineHeight: '1.5' }}>{q.content}</p>
+      <p style={{ fontWeight: 500, margin: '0 0 0.25rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{q.content}</p>
       <p className="text-muted" style={{ fontSize: '0.8rem', margin: '0 0 1rem' }}>
         Asked by {q.user?.name || 'a citizen'} · {q.assignedTo ? `Assigned to ${q.assignedTo.name}` : 'Not assigned to anyone'}
       </p>

@@ -69,7 +69,7 @@ export default function Community({ role }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
                 <div>
                   <div style={{ marginBottom: '0.5rem' }}><DocumentBadge question={q} /></div>
-                  <p style={{ fontWeight: 500, margin: '0.5rem 0 0', lineHeight: '1.5' }}>{q.content}</p>
+                  <p style={{ fontWeight: 500, margin: '0.5rem 0 0', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{q.content}</p>
                   <p className="text-muted" style={{ fontSize: '0.8rem', margin: '0.25rem 0 0' }}>Asked by {q.user?.name || 'a citizen'}</p>
                 </div>
                 <StatusBadge question={q} />

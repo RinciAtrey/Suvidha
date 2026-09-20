@@ -67,7 +67,7 @@ export default function MyTickets({ role }) {
           {tickets.map(q => (
             <div key={q.id} className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid #f59e0b' }}>
               <div style={{ marginBottom: '0.75rem' }}><DocumentBadge question={q} /></div>
-              <p style={{ fontWeight: 500, margin: '0 0 0.25rem', lineHeight: '1.5' }}>{q.content}</p>
+              <p style={{ fontWeight: 500, margin: '0 0 0.25rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{q.content}</p>
               <p className="text-muted" style={{ fontSize: '0.8rem', margin: '0 0 1rem' }}>Asked by {q.user?.name || 'a citizen'}</p>
 
               <MessageThread question={q} currentUserId={userId} currentRole={role} onSend={handleSendMessage} onClose={handleClose} />

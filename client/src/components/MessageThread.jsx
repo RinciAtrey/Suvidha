@@ -51,7 +51,7 @@ export default function MessageThread({ question, currentUserId, currentRole, on
                 }}>
                   {fromStaff ? `Official Response - ${m.author?.name || 'Staff'}` : m.author?.name || 'Citizen'}
                 </span>
-                <p style={{ fontSize: '0.875rem', margin: 0, lineHeight: '1.5' }}>{m.content}</p>
+                <p style={{ fontSize: '0.875rem', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{m.content}</p>
               </div>
             );
           })}

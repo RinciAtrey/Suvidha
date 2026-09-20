@@ -119,6 +119,7 @@ export default function ChatWidget() {
                   maxWidth: '85%', padding: '0.6rem 0.9rem', borderRadius: '12px', fontSize: '0.875rem', lineHeight: '1.5',
                   background: m.role === 'user' ? 'var(--primary)' : 'var(--soft-bg)',
                   color: m.role === 'user' ? 'white' : 'var(--text-color)',
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                 }}
               >
                 {m.content}
