@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String     @id @default(uuid())
+  email             String     @unique
+  name              String?
+  password          String
+  role              String     @default("user") // 'user' | 'admin' | 'superadmin'
+  isAvailable       Boolean    @default(true)   // admins/superadmins toggle this to receive auto-assigned tickets
+  questionsAsked    Question[] @relation("AskedBy")
+  questionsAssigned Question[] @relation("AssignedAdmin")
+  messages          Message[]
+  createdAt         DateTime   @default(now())
+}
+
+model Document {
+  id           String     @id @default(uuid())
+  title        String
+  description  String
+  steps        String     // How to create/apply: newline-separated numbered steps
+  updateSteps  String?    // How to update/renew an existing document: newline-separated numbered steps
+  requiredDocs String?    // Comma-separated checklist of required documents
+  officialLink String?    // Primary official portal URL
+  sources      String?    // Newline-separated "Label|URL" list of official reference sources
+  guides       String?    // Newline-separated "Label|URL" list of external guides/tutorials/FAQs
+  questions    Question[]
+  createdAt    DateTime   @default(now())
+}
+
+model Question {
+  id           String   @id @default(uuid())
+  content      String
+  userId       String
+  user         User     @relation("AskedBy", fields: [userId], references: [id])
+  documentId   String
+  document     Document @relation(fields: [documentId], references: [id])
+  status       String   @default("unassigned") // 'unassigned' | 'assigned' | 'answered'
+  assignedToId String?
+  assignedTo   User?    @relation("AssignedAdmin", fields: [assignedToId], references: [id])
+  messages     Message[]
+  createdAt    DateTime @default(now())
+}
+
+model Scheme {
+  id            String   @id @default(uuid())
+  name          String
+  description   String
+  category      String   // 'Agriculture' | 'Health' | 'Housing' | 'Education' | 'Women & Child' | 'Employment' | 'Senior Citizens' | 'Financial Inclusion'
+  benefits      String
+  minAge        Int?
+  maxAge        Int?
+  gender        String?  // 'male' | 'female' | null (any)
+  maxIncome     Int?     // annual family income cap in INR; null = no cap
+  occupation    String?  // comma-separated allowed occupations; null = any
+  socialCategory String? // comma-separated allowed categories e.g. 'SC,ST,OBC,General'; null = any
+  isStudent     Boolean? // true = must currently be a student
+  officialLink  String?
+  createdAt     DateTime @default(now())
+}
+
+// A single message in the ongoing conversation on a Question - posted by either the
+// citizen who asked or the admin/superadmin handling it. Threads stay open indefinitely.
+model Message {
+  id         String   @id @default(uuid())
+  content    String
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id])
+  authorRole String   // snapshot of the author's role when they posted: 'user' | 'admin' | 'superadmin'
+  createdAt  DateTime @default(now())
+}
